@@ -15,10 +15,10 @@ namespace net_il_mio_fotoalbum.Models
         [Required]
         public byte[] Image { get; set; }
         [Required]
-        public bool visible { get; set; }
+        public bool Visible { get; set; }
 
         // many to many relationship with Category
-        List<Category> Categories { get; set; } 
+        public List<Category>? Categories { get; set; } 
 
     }
 }

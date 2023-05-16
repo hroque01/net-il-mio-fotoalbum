@@ -38,6 +38,58 @@ namespace net_il_mio_fotoalbum.Controllers
                 return View("Create", model);
             }
         }
-            
+
+        [Authorize(Roles = "ADMIN")]
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public IActionResult Create(PhotoFormModel data)
+        {
+            using (PhotoContext db = new PhotoContext())
+            {
+                if (!ModelState.IsValid)
+                {
+                    List<Category> categories = db.Categories.ToList();
+                    List<SelectListItem> listCategories = new List<SelectListItem>();
+
+                    foreach (Category category in categories)
+                    {
+                        listCategories.Add(new SelectListItem()
+                        {
+                            Text = category.Name,
+                            Value = category.Id.ToString()
+                        });
+                    }
+
+                    data.Category = listCategories;
+
+                    return View(data);
+                }
+
+                //Crea nuovo oggetto dal server. Contiene dati del form
+                Photo photo = new Photo();
+                photo.Title = data.Photo.Title;
+                photo.Description = data.Photo.Description;
+                photo.Image = data.Photo.Image;
+                photo.Visible = data.Photo.Visible;
+
+                photo.Categories = new List<Category>();
+
+                if (data.SelectedCategory != null)
+                {
+                    foreach (string selectedCategoryId in data.SelectedCategory)
+                    {
+                        int categoryId = int.Parse(selectedCategoryId);
+                        Category category = db.Categories.Where(category => category.Id == categoryId).FirstOrDefault();
+                        photo.Categories.Add(category);
+
+                    }
+                }
+
+                db.Photos.Add(photo);
+                db.SaveChanges();
+
+                return RedirectToAction("Index");
+            }
+        }
     }
 }
