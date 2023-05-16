@@ -19,5 +19,6 @@ namespace net_il_mio_fotoalbum.Models
 
         // many to many relationship with Category
         List<Category> Categories { get; set; } 
+
     }
 }
