@@ -11,6 +11,7 @@ namespace net_il_mio_fotoalbum.Models
         
         public string Name { get; set; }
 
+        //Relation MtoM [Photo]
         public List<Photo> Photos { get; set; }
     }
 }

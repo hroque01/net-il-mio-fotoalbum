@@ -17,6 +17,7 @@ namespace net_il_mio_fotoalbum.Models
 
         public bool Visibility { get; set; }
 
+        //Relation MtoM [Category]
         public List<Category>? Categories { get; set; }
     }
 }

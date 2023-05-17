@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
+using Microsoft.EntityFrameworkCore;
 using net_il_mio_fotoalbum.Models;
 using System.Drawing;
 
@@ -7,6 +8,7 @@ namespace net_il_mio_fotoalbum.Controllers
 {
     public class PhotoController : Controller
     {
+        //INDEX, stampa tutte le foto nella index
         [HttpGet]
         public IActionResult Index()
         {
@@ -30,6 +32,7 @@ namespace net_il_mio_fotoalbum.Controllers
             }
         }
 
+        //CREATE, HTTPGET
         [HttpGet]
         public IActionResult Create()
         {
@@ -58,6 +61,7 @@ namespace net_il_mio_fotoalbum.Controllers
             }
         }
 
+        //CREATE, HTTPPOST
         [HttpPost]
         [ValidateAntiForgeryToken]
         public IActionResult Create(PhotoFormModel model)
@@ -109,7 +113,8 @@ namespace net_il_mio_fotoalbum.Controllers
             // Se il modello non è valido, ritorna la vista "Create" con il modello
             return View(model);
         }
-
+        
+        //DELETE
         [HttpPost]
         [ValidateAntiForgeryToken]
         public IActionResult Delete(long id)
@@ -125,6 +130,21 @@ namespace net_il_mio_fotoalbum.Controllers
                 }
 
                 return RedirectToAction("Index");
+            }
+        }
+
+        //DETAILS
+        [HttpGet]
+        public IActionResult Details(long id)
+        {
+            using (PhotoContext db = new PhotoContext())
+            {
+                Photo photo = db.Photos.Where(photo => photo.Id == id).Include(photo => photo.Categories).FirstOrDefault();
+
+                if (photo == null)
+                    return View("Error", "Nessuna foto trovata con questo ID!");
+
+                return View("Details", photo);
             }
         }
     }
