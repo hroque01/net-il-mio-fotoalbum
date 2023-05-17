@@ -7,18 +7,16 @@ namespace net_il_mio_fotoalbum.Models
     public class Photo
     {
         [Key]
-        public int Id { get; set; }
-        [Required]
+        public long Id { get; set; }
+
         public string Title { get; set; }
-        [Required]
+
         public string Description { get; set; }
-        [Required]
-        public byte[] Image { get; set; }
-        [Required]
-        public bool Visible { get; set; }
 
-        // many to many relationship with Category
-        public List<Category>? Categories { get; set; } 
+        public byte[]? Image { get; set; }
 
+        public bool Visibility { get; set; }
+
+        public List<Category>? Categories { get; set; }
     }
 }

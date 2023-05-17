@@ -1,95 +1,113 @@
-﻿using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using net_il_mio_fotoalbum.Models;
-using System.Data;
+using System.Drawing;
 
 namespace net_il_mio_fotoalbum.Controllers
 {
     public class PhotoController : Controller
     {
+        [HttpGet]
         public IActionResult Index()
         {
-            return View();
+            using(PhotoContext db = new PhotoContext())
+            {
+                List <Photo> photos = db.Photos.ToList();
+
+                List<string> imagesData = new List<string>();
+
+                foreach(Photo photo in photos)
+                {
+                    imagesData.Add(Convert.ToBase64String(photo.Image));
+                }
+
+                PhotoFormModel model = new PhotoFormModel();
+
+                model.ListPhotos = photos;
+                model.ListImages = imagesData;
+
+                return View(model);
+            }
         }
 
-        [Authorize(Roles = "ADMIN")]
         [HttpGet]
-        // Controller for CREATE PAGES
         public IActionResult Create()
         {
-            //DATABASE
             using (PhotoContext db = new PhotoContext())
             {
                 PhotoFormModel model = new PhotoFormModel();
-                
-                List<SelectListItem> listCategory = new List<SelectListItem>();
-                foreach (Category category in db.Categories)
+                List<Category> categories = db.Categories.ToList();
+
+                List<SelectListItem> listCategories = new List<SelectListItem>();
+
+                foreach (Category category in categories)
                 {
-                    listCategory.Add(new SelectListItem()
+                    listCategories.Add(new SelectListItem
                     {
-                        Text = category.Name, Value = category.Id.ToString()
+                        Text = category.Name,
+                        Value = category.Id.ToString()
                     });
                 }
 
-                model.Photo = new Photo();
-                model.Category = listCategory;
+                Photo photo = new Photo();
+                photo.Visibility = true;
 
+                model.Categories = listCategories;
+                model.Photo = photo;
                 return View("Create", model);
             }
         }
 
-        [Authorize(Roles = "ADMIN")]
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public IActionResult Create(PhotoFormModel data)
+        public IActionResult Create(PhotoFormModel model)
         {
-            using (PhotoContext db = new PhotoContext())
+            if (ModelState.IsValid)
             {
-                if (!ModelState.IsValid)
+                // Gestisci l'immagine solo se è stata fornita
+                if (model.ImageFile != null && model.ImageFile.Length > 0)
                 {
-                    List<Category> categories = db.Categories.ToList();
-                    List<SelectListItem> listCategories = new List<SelectListItem>();
-
-                    foreach (Category category in categories)
+                    using (PhotoContext db = new PhotoContext())
                     {
-                        listCategories.Add(new SelectListItem()
+                        // Leggi i dati dell'immagine come array di byte
+                        byte[] imageData = null;
+                        using (var binaryReader = new BinaryReader(model.ImageFile.OpenReadStream()))
                         {
-                            Text = category.Name,
-                            Value = category.Id.ToString()
-                        });
-                    }
+                            imageData = binaryReader.ReadBytes((int)model.ImageFile.Length);
+                        }
 
-                    data.Category = listCategories;
+                        List<Category> categories = new List<Category>();
+                        foreach (var categoryid in model.SelectedCategories)
+                        {
+                            int intcategoryid = int.Parse(categoryid);
+                            var category = db.Categories.Where(c => c.Id == intcategoryid).FirstOrDefault();
+                            categories.Add(category);
+                        }
 
-                    return View(data);
+
+                        // Crea un nuovo oggetto Photo e assegna i valori
+                        Photo photo = new Photo
+                        {
+                            Title = model.Photo.Title,
+                            Description = model.Photo.Description,
+                            Image = imageData,
+                            Visibility = model.Photo.Visibility,
+                            Categories = categories
+                            // Assegna altre proprietà necessarie
+                        };
+
+                        // Salva l'oggetto Photo nel database
+
+                            db.Photos.Add(photo);
+                            db.SaveChanges();
+                        }
+
+                        return RedirectToAction("Index");
                 }
-
-                //Crea nuovo oggetto dal server. Contiene dati del form
-                Photo photo = new Photo();
-                photo.Title = data.Photo.Title;
-                photo.Description = data.Photo.Description;
-                photo.Image = data.Photo.Image;
-                photo.Visible = data.Photo.Visible;
-
-                photo.Categories = new List<Category>();
-
-                if (data.SelectedCategory != null)
-                {
-                    foreach (string selectedCategoryId in data.SelectedCategory)
-                    {
-                        int categoryId = int.Parse(selectedCategoryId);
-                        Category category = db.Categories.Where(category => category.Id == categoryId).FirstOrDefault();
-                        photo.Categories.Add(category);
-
-                    }
-                }
-
-                db.Photos.Add(photo);
-                db.SaveChanges();
-
-                return RedirectToAction("Index");
             }
+
+            // Se il modello non è valido, ritorna la vista "Create" con il modello
+            return View(model);
         }
     }
 }

@@ -11,8 +11,8 @@ using net_il_mio_fotoalbum.Models;
 namespace net_il_mio_fotoalbum.Migrations
 {
     [DbContext(typeof(PhotoContext))]
-    [Migration("20230516124530_UpdateEntityAddBook")]
-    partial class UpdateEntityAddBook
+    [Migration("20230516155653_FixedNameVisibility")]
+    partial class FixedNameVisibility
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -24,13 +24,28 @@ namespace net_il_mio_fotoalbum.Migrations
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
 
+            modelBuilder.Entity("CategoryPhoto", b =>
+                {
+                    b.Property<long>("CategoriesId")
+                        .HasColumnType("bigint");
+
+                    b.Property<long>("PhotosId")
+                        .HasColumnType("bigint");
+
+                    b.HasKey("CategoriesId", "PhotosId");
+
+                    b.HasIndex("PhotosId");
+
+                    b.ToTable("CategoryPhoto");
+                });
+
             modelBuilder.Entity("net_il_mio_fotoalbum.Models.Category", b =>
                 {
-                    b.Property<int>("Id")
+                    b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
+                        .HasColumnType("bigint");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("Id"));
 
                     b.Property<string>("Name")
                         .IsRequired()
@@ -43,30 +58,44 @@ namespace net_il_mio_fotoalbum.Migrations
 
             modelBuilder.Entity("net_il_mio_fotoalbum.Models.Photo", b =>
                 {
-                    b.Property<int>("Id")
+                    b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
+                        .HasColumnType("bigint");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("Id"));
 
                     b.Property<string>("Description")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<byte[]>("Image")
-                        .IsRequired()
                         .HasColumnType("varbinary(max)");
 
                     b.Property<string>("Title")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<bool>("visible")
+                    b.Property<bool>("Visibility")
                         .HasColumnType("bit");
 
                     b.HasKey("Id");
 
                     b.ToTable("photo");
+                });
+
+            modelBuilder.Entity("CategoryPhoto", b =>
+                {
+                    b.HasOne("net_il_mio_fotoalbum.Models.Category", null)
+                        .WithMany()
+                        .HasForeignKey("CategoriesId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("net_il_mio_fotoalbum.Models.Photo", null)
+                        .WithMany()
+                        .HasForeignKey("PhotosId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
                 });
 #pragma warning restore 612, 618
         }

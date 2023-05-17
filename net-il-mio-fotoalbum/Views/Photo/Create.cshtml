@@ -1,5 +1,45 @@
-﻿@*
-    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
-*@
-@{
-}
+﻿@model PhotoFormModel
+
+<div class="container">
+    <form asp-controller="Photo" asp-action="Create" method="post" enctype="multipart/form-data">
+        @Html.AntiForgeryToken()
+        <div class="mb-3">
+            <strong>Nome:</strong>
+            <input asp-for="Photo.Title" class="d-block w-100" />
+            <span asp-validation-for="Photo.Title" class="text-danger"></span>
+
+        </div>
+        <div class="mb-3">
+            <strong>Descrizione:</strong>
+            <input asp-for="Photo.Description" class="d-block w-100" />
+            <span asp-validation-for="Photo.Description" class="text-danger"></span>
+
+        </div>
+        <div class="mb-3">
+            <strong>Link Immagine:</strong>
+            <input type="file" asp-for="ImageFile" class="d-block w-100" />
+            <span asp-validation-for="ImageFile" class="text-danger"></span>
+        </div>
+        <div class="mb-3">
+            <strong>Visibility:</strong>
+            <select asp-for="Photo.Visibility">
+                <option value="true">Yes</option>
+                <option value="false">No</option>
+            </select>
+
+        </div>
+        <div class="mb-3">
+            <label>Ingredients : </label>
+            <select asp-for="SelectedCategories" multiple="multiple" asp-items="Model.Categories" size="10"
+                    class="form-control mb-2 mr-sm-2 ml-sm-3 leftList">
+            </select>
+            <span asp-validation-for="SelectedCategories" class="text-danger"></span>
+
+        </div>
+
+
+        <div class="text-end">
+            <input type="submit" class="btn btn-small btn-info" value="Salva">
+        </div>
+    </form>
+</div>
