@@ -139,12 +139,20 @@ namespace net_il_mio_fotoalbum.Controllers
         {
             using (PhotoContext db = new PhotoContext())
             {
-                Photo photo = db.Photos.Where(photo => photo.Id == id).Include(photo => photo.Categories).FirstOrDefault();
+                Photo photo = db.Photos.Where(ph => ph.Id == id).Include(ph => ph.Categories).FirstOrDefault();
+                string imagesData = Convert.ToBase64String(photo.Image);
+
+                PhotoFormModel model = new PhotoFormModel();
+
+                model.Photo = photo;
+                model.Image = imagesData;
 
                 if (photo == null)
-                    return View("Error", "Nessuna foto trovata con questo ID!");
+                {
+                    return NotFound();
+                }
 
-                return View("Details", photo);
+                return View(model);
             }
         }
     }
