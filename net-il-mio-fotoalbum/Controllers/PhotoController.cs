@@ -109,5 +109,23 @@ namespace net_il_mio_fotoalbum.Controllers
             // Se il modello non è valido, ritorna la vista "Create" con il modello
             return View(model);
         }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public IActionResult Delete(long id)
+        {
+            using (PhotoContext db = new PhotoContext())
+            {
+                Photo photo = db.Photos.Where(ph => ph.Id == id).FirstOrDefault();
+                if (photo != null)
+                {
+                    db.Photos.Remove(photo);
+                    db.SaveChanges();
+                    return RedirectToAction("Index");
+                }
+
+                return RedirectToAction("Index");
+            }
+        }
     }
 }
