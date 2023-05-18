@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using net_il_mio_fotoalbum.Models;
@@ -56,6 +57,7 @@ namespace net_il_mio_fotoalbum.Controllers
 
         //HTTPGET CREATE
         // Questo metodo risponde ad una richiesta GET all'endpoint '/Create'
+        [Authorize(Roles = "ADMIN")]
         [HttpGet]
         public IActionResult Create()
         {
@@ -93,6 +95,7 @@ namespace net_il_mio_fotoalbum.Controllers
         }
 
         //HTTPPOST CREATE
+        [Authorize(Roles = "ADMIN")]
         [HttpPost]
         [ValidateAntiForgeryToken]
         public IActionResult Create(PhotoFormModel model)
@@ -169,6 +172,7 @@ namespace net_il_mio_fotoalbum.Controllers
         }
 
         //HTTPGET UPDATE
+        [Authorize(Roles = "ADMIN")]
         [HttpGet]
         public IActionResult Update(long id)
         {
@@ -206,6 +210,7 @@ namespace net_il_mio_fotoalbum.Controllers
         }
 
         //HTTPPOST UPDATE
+        [Authorize(Roles = "ADMIN")]
         [HttpPost]
         [ValidateAntiForgeryToken]
         public IActionResult Update(long id, PhotoFormModel model)
@@ -297,6 +302,7 @@ namespace net_il_mio_fotoalbum.Controllers
         }
 
         //HTTPPOST DELETE
+        [Authorize(Roles = "ADMIN")]
         [HttpPost]
         [ValidateAntiForgeryToken]
         public IActionResult Delete(long id)
